@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskFlow – Quản lý công việc thông minh</title>
+  <meta name="description" content="TaskFlow – Ứng dụng quản lý công việc hiện đại với giao diện đẹp, hỗ trợ phân loại, ưu tiên và lưu trữ cục bộ."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Background blobs -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">✦</span>
+          <span class="logo-text">TaskFlow</span>
+        </div>
+        <p class="header-date" id="headerDate"></p>
+      </div>
+      <div class="header-right">
+        <div class="stats-pill">
+          <span id="statsDone">0</span>/<span id="statsTotal">0</span>
+          <span class="stats-label">hoàn thành</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <span class="progress-text" id="progressText">0%</span>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-card">
+      <div class="input-row">
+        <input
+          type="text"
+          id="taskInput"
+          placeholder="Thêm công việc mới..."
+          autocomplete="off"
+          maxlength="200"
+        />
+        <button id="addBtn" class="btn-add" title="Thêm task">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="input-meta">
+        <div class="meta-group">
+          <label class="meta-label">Danh mục</label>
+          <div class="category-pills" id="categorySelect">
+            <button class="cat-pill active" data-cat="personal">👤 Cá nhân</button>
+            <button class="cat-pill" data-cat="work">💼 Công việc</button>
+            <button class="cat-pill" data-cat="study">📚 Học tập</button>
+            <button class="cat-pill" data-cat="health">❤️ Sức khỏe</button>
+            <button class="cat-pill" data-cat="other">🌀 Khác</button>
+          </div>
+        </div>
+        <div class="meta-group">
+          <label class="meta-label">Ưu tiên</label>
+          <div class="priority-pills" id="prioritySelect">
+            <button class="pri-pill" data-pri="low">🟢 Thấp</button>
+            <button class="pri-pill active" data-pri="medium">🟡 Trung bình</button>
+            <button class="pri-pill" data-pri="high">🔴 Cao</button>
+          </div>
+        </div>
+        <div class="meta-group">
+          <label class="meta-label">Hạn chót</label>
+          <input type="date" id="dueDateInput" class="date-input"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">Tất cả</button>
+        <button class="filter-tab" data-filter="active">Đang làm</button>
+        <button class="filter-tab" data-filter="completed">Hoàn thành</button>
+      </div>
+      <div class="filter-right">
+        <select id="catFilter" class="cat-filter-select">
+          <option value="all">Tất cả danh mục</option>
+          <option value="personal">👤 Cá nhân</option>
+          <option value="work">💼 Công việc</option>
+          <option value="study">📚 Học tập</option>
+          <option value="health">❤️ Sức khỏe</option>
+          <option value="other">🌀 Khác</option>
+        </select>
+        <button class="btn-clear-done" id="clearDoneBtn" title="Xóa đã hoàn thành">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Xóa đã xong
+        </button>
+      </div>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list" id="taskList">
+      <!-- Tasks will be rendered here -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">🎯</div>
+      <h3>Chưa có công việc nào!</h3>
+      <p>Thêm một task mới để bắt đầu ngày làm việc hiệu quả.</p>
+    </div>
+
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Chỉnh sửa công việc</h3>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <input type="text" id="editInput" class="modal-input" maxlength="200"/>
+      <div class="input-meta">
+        <div class="meta-group">
+          <label class="meta-label">Danh mục</label>
+          <div class="category-pills" id="editCategorySelect">
+            <button class="cat-pill active" data-cat="personal">👤 Cá nhân</button>
+            <button class="cat-pill" data-cat="work">💼 Công việc</button>
+            <button class="cat-pill" data-cat="study">📚 Học tập</button>
+            <button class="cat-pill" data-cat="health">❤️ Sức khỏe</button>
+            <button class="cat-pill" data-cat="other">🌀 Khác</button>
+          </div>
+        </div>
+        <div class="meta-group">
+          <label class="meta-label">Ưu tiên</label>
+          <div class="priority-pills" id="editPrioritySelect">
+            <button class="pri-pill" data-pri="low">🟢 Thấp</button>
+            <button class="pri-pill active" data-pri="medium">🟡 Trung bình</button>
+            <button class="pri-pill" data-pri="high">🔴 Cao</button>
+          </div>
+        </div>
+        <div class="meta-group">
+          <label class="meta-label">Hạn chót</label>
+          <input type="date" id="editDueDateInput" class="date-input"/>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modalCancelBtn">Hủy</button>
+        <button class="btn-save" id="modalSaveBtn">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
